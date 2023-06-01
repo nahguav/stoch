@@ -39,7 +39,7 @@ pub struct RandomVector<T>
 impl<T> Sample<T> for RandomVector<T> {
     fn new<D, R>(dist: D, rng: &mut R, n: usize) -> Self where D: Distribution<T>, R: Rng + ?Sized
     {
-        let values = dist.sample_iter(rng).take(n).collect();
+        let values = dist.sample_iter(rng).take(n+1).collect();
         RandomVector { values }
     }
 }

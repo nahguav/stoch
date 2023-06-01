@@ -5,3 +5,4 @@
 
 pub mod processes;
 pub mod rvector;
+pub mod rv_functions;
