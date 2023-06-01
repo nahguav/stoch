@@ -3,14 +3,14 @@ use rand::{Rng};
 
 /// trait Sample implements a method to initiate/resample RandomVectors with generic distributions and rng.
 pub trait Sample<T> {
-    /// fills self.values with random variables.
+    /// Returns a 'RandomVector' with 'n' random variables drawn from specified distribution 'dist' and source rng 'rng'.
     /// 
     /// # Arguments
     /// 
+    /// * 'self'
     /// * 'dist' - A distribution object that implements the Distribution trait rand::distributions::Distribution.
     /// * 'rng' - A rng object that specifices the source of rng. ie, rand::Rng
     /// * 'n' - desired length of the random vector.
-    /// 
     ///  # Example
     /// 
     /// ```
@@ -22,23 +22,10 @@ pub trait Sample<T> {
     ///     let mut rng = rand::thread_rng();
     ///     let n = 2;
     ///     let rv = RandomVector::new(dist, &mut rng, n);
-    ///        
-    ///     let n2 = 2000;
-    ///     rv.sample(dist, &mut rng, n2);
     ///     println!("{rv:?}");
     ///
     /// }
     /// ```
-    fn sample<D, R>(&mut self, dist: D, rng: &mut R, n: usize) where D: Distribution<T>, R: Rng + ?Sized;
-
-    /// Returns a 'RandomVector' with 'n' random variables drawn from specified distribution 'dist' and source rng 'rng'.
-    /// 
-    /// # Arguments
-    /// 
-    /// * 'self'
-    /// * 'dist' - A distribution object that implements the Distribution trait rand::distributions::Distribution.
-    /// * 'rng' - A rng object that specifices the source of rng. ie, rand::Rng
-    /// * 'n' - desired length of the random vector.
     fn new<D, R>(dist: D, rng: &mut R, n: usize) -> Self where D: Distribution<T>, R: Rng + ?Sized;
 }
 
@@ -50,14 +37,6 @@ pub struct RandomVector<T>
 }
 
 impl<T> Sample<T> for RandomVector<T> {
-    fn sample<D, R>(&mut self, dist: D, rng: &mut R, n: usize) 
-    where 
-    D: Distribution<T>, 
-    R: Rng + ?Sized
-    {
-        self.values = dist.sample_iter(rng).take(n).collect();
-    }
-
     fn new<D, R>(dist: D, rng: &mut R, n: usize) -> Self where D: Distribution<T>, R: Rng + ?Sized
     {
         let values = dist.sample_iter(rng).take(n).collect();
