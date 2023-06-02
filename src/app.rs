@@ -1,8 +1,9 @@
 use eframe::egui::plot::{Plot, Line, PlotPoints};
 use crate::processes::{Process, TimeSeries, TimePoint}; 
 use crate::rvector::{RandomVector, Sample};
-use crate::rv_functions::martingale;
-use rand_distr::Uniform;
+use crate::rv_mappings::sum;
+use rand_distr::{Uniform, Normal};
+
 
 pub struct TemplateApp {
     // todo: add serialization of lines?
@@ -11,12 +12,12 @@ pub struct TemplateApp {
 
 impl Default for TemplateApp {
     fn default() -> Self {
-        let n = 20;
-        let dist = Uniform::new(-10.0, 10.0);
+        let n = 2000;
+        let dist = Uniform::new(-1.0, 1.0);
         let mut rng = rand::thread_rng();
     
         let rv = RandomVector::new(dist, &mut rng, n);
-        let p = Process::run_sim(&rv, martingale);
+        let p = Process::run_sim(&rv, sum);
     
         //let m: PlotPoints = p.into();
         let lines = vec![p];
@@ -33,7 +34,7 @@ impl TemplateApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         // This is also where you can customize the look and feel of egui using
         // `cc.egui_ctx.set_visuals` and `cc.egui_ctx.set_fonts`.
-
+        
         // Load previous app state (if any).
         // Note that you must enable the `persistence` feature for this to work.
         // if let Some(storage) = cc.storage {
@@ -54,12 +55,33 @@ impl eframe::App for TemplateApp {
         // Pick whichever suits you.
         // Tip: a good default choice is to just keep the `CentralPanel`.
         // For inspiration and more examples, go to https://emilk.github.io/egui
+        egui::SidePanel::left("side_panel").show(ctx, |ui| {
+            ui.heading("Side Panel");
+
+            ui.horizontal(|ui| {
+                ui.label("Write something: ");
+            });
+            if ui.button("Increment").clicked() {
+                let n = 2000;
+                let dist = Uniform::new(-1.0, 1.0);
+                let mut rng = rand::thread_rng();
+            
+                let rv = RandomVector::new(dist, &mut rng, n);
+                let p = Process::run_sim(&rv, sum);
+                lines.push(p);
+                let m = lines.len();
+                println!("{m:}");
+            }
+        });
 
         egui::CentralPanel::default().show(ctx, |ui| {  
-            for p in lines{
-                let m: PlotPoints = p.mut_into();
-                let l = Line::new(m);   
-                Plot::new("my_plot").view_aspect(2.0).show(ui, |plot_ui| plot_ui.line(l));
+            {
+                Plot::new("plot").view_aspect(2.0).show(ui, |plot_ui| {
+                    for i in 0..lines.len(){
+                        let m: PlotPoints = lines[i].mut_into();
+                        let l = Line::new(m);   
+                        plot_ui.line(l)}
+                });
             }        
             egui::warn_if_debug_build(ui);
         });
