@@ -17,18 +17,27 @@ pub trait TimeSeries {
     /// * 'rv' - &RandomVector<T> populated with random variables.
     /// * 'f' - function defining the process.  
     fn run_sim<T>(rv: &RandomVector<T>, f: fn(&[T]) -> f64) -> Process<TimePoint>;
+
+    /// turns &mut reference to self into PlotPoints for visualizing with egui.
+    /// A &mut reference is present when Process<TimePoint> objects are being referenced from a vector. 
+    /// 
+    /// # Arguments
+    /// 
+    /// *'&mut self'
+    /// 
+    fn mut_into(&mut self) -> PlotPoints;
 } 
 
 /// Used in `Process<TimePoint>` holds a `t` time value and a `y` value. 
 /// Useful for plotting.
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct TimePoint {
     pub t: f64,
     pub y: f64,
 }
 
 /// struct containing the stochastic proccess' data. 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Process<TimePoint> {
     pub data: Vec<TimePoint>,
 }
@@ -52,6 +61,14 @@ impl TimeSeries for Process<TimePoint> {
         }
         p
     }
+
+    fn mut_into(&mut self) -> PlotPoints {
+        let mut v = Vec::new();
+        for p in self.data.as_slice(){
+            v.push( PlotPoint {x: p.t, y: p.y})
+        }
+        PlotPoints::Owned(v)
+    }
 }
 
 impl Into<PlotPoints> for Process<TimePoint> {
@@ -63,3 +80,4 @@ impl Into<PlotPoints> for Process<TimePoint> {
         PlotPoints::Owned(v)
     }
 }
+
