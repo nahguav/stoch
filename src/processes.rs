@@ -1,3 +1,4 @@
+use egui::plot::{PlotPoint, PlotPoints};
 use crate::rvector::RandomVector;
 
 /// methods for creating stochastic processes 
@@ -9,14 +10,13 @@ pub trait TimeSeries {
     /// * 'n' - usize determining how many increments between [0,1].
     fn init(n: usize) -> Process<TimePoint>;
 
-    /// update self.data with $f: [X] -> Y$
+    /// Return a populated Process object 
     /// 
     /// # Arguments
     /// 
-    /// * '&mut self' - mutable reference to Process<TimePoint>.
     /// * 'rv' - &RandomVector<T> populated with random variables.
     /// * 'f' - function defining the process.  
-    fn run_sim<T>(&mut self, rv: &RandomVector<T>, f: fn(&[T]) -> f64);
+    fn run_sim<T>(rv: &RandomVector<T>, f: fn(&[T]) -> f64) -> Process<TimePoint>;
 } 
 
 /// Used in `Process<TimePoint>` holds a `t` time value and a `y` value. 
@@ -45,10 +45,21 @@ impl TimeSeries for Process<TimePoint> {
     }
 
 
-    fn run_sim<T>(&mut self, rv: &RandomVector<T>, f: fn(&[T]) -> f64){
-        assert!(self.data.len() <= rv.values.len(), "the size of the rv needs to be minimum size of self.data");
-        for x in 0..self.data.len() {
-            self.data[x].y = f(&rv.values[0..x]);
+    fn run_sim<T>(rv: &RandomVector<T>, f: fn(&[T]) -> f64) -> Process<TimePoint>{
+        let mut p = Self::init(rv.values.len());
+        for x in 0..p.data.len() {
+           p.data[x].y = f(&rv.values[0..x]);
         }
+        p
+    }
+}
+
+impl Into<PlotPoints> for Process<TimePoint> {
+    fn into(self) -> PlotPoints {
+        let mut v = Vec::new();
+        for p in self.data{
+            v.push( PlotPoint {x: p.t, y: p.y})
+        }
+        PlotPoints::Owned(v)
     }
 }
