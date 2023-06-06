@@ -5,6 +5,4 @@
 
 pub mod processes;
 pub mod rvector;
-pub mod rv_functions;
-mod app;
-pub use app::TemplateApp;
+pub mod mappings;

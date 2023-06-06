@@ -1,16 +1,27 @@
-use eframe::egui::plot::{Plot, Line, PlotPoints};
-use crate::processes::{Process, TimeSeries, TimePoint}; 
-use crate::rvector::{RandomVector, Sample};
-use crate::rv_mappings::sum;
-use rand_distr::{Uniform, Normal};
+use eframe::egui::plot::{Plot, Line, PlotPoints, PlotPoint};
+use stochastic_processes::processes::{Process, TimeSeries, TimePoint}; 
+use stochastic_processes::rvector::{RandomVector, Sample};
+use stochastic_processes::mappings::sum;
+use rand_distr::{Uniform};
 
 
-pub struct TemplateApp {
+pub struct GraphApp {
     // todo: add serialization of lines?
     lines: Vec<Process<TimePoint>>
 }
 
-impl Default for TemplateApp {
+pub trait PlotSeries {
+    /// turns &mut reference to self into PlotPoints for visualizing with egui.
+    /// A &mut reference is present when Process<TimePoint> objects are being referenced from a vector. 
+    /// 
+    /// # Arguments
+    /// 
+    /// *'&mut self'
+    /// 
+    fn mut_into(&mut self) -> PlotPoints;
+}
+
+impl Default for GraphApp {
     fn default() -> Self {
         let n = 2000;
         let dist = Uniform::new(-1.0, 1.0);
@@ -29,7 +40,7 @@ impl Default for TemplateApp {
     }
 }
 
-impl TemplateApp {
+impl GraphApp {
     /// Called once before the first frame.
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         // This is also where you can customize the look and feel of egui using
@@ -45,7 +56,7 @@ impl TemplateApp {
     }
 }
 
-impl eframe::App for TemplateApp {
+impl eframe::App for GraphApp {
     /// Called each time the UI needs repainting, which may be many times per second.
     /// Put your widgets into a `SidePanel`, `TopPanel`, `CentralPanel`, `Window` or `Area`.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
@@ -85,5 +96,16 @@ impl eframe::App for TemplateApp {
             }        
             egui::warn_if_debug_build(ui);
         });
+    }
+}
+
+
+impl PlotSeries for Process<TimePoint> {
+    fn mut_into(&mut self) -> PlotPoints {
+        let mut v = Vec::new();
+        for p in self.data.as_slice(){
+            v.push( PlotPoint {x: p.t, y: p.y})
+        }
+        PlotPoints::Owned(v)
     }
 }
