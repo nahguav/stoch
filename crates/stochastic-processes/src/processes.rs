@@ -1,6 +1,9 @@
 //! Generate stochastic processes. 
 //! 
 use crate::rvector::RandomVector;
+use core::f64::INFINITY;
+use core::f64::NEG_INFINITY;
+use crate::mappings::sum;
 
 /// methods for creating stochastic processes 
 pub trait TimeSeries {
@@ -46,6 +49,51 @@ pub struct TimePoint {
 #[derive(Debug, Clone)]
 pub struct Process<TimePoint> {
     pub data: Vec<TimePoint>,
+}
+
+/// helper math functions for processes.
+impl Process<TimePoint> {
+
+    /// Return the supremum of the process.
+    fn sup(&self) -> f64 {
+        let mut s = NEG_INFINITY; 
+        for x in &self.data {
+            if x.y > s { s = x.y}
+        }
+        s
+    } 
+
+    /// Return the infinum of the process.
+    fn inf(&self) -> f64 {
+        let mut i = INFINITY; 
+        for x in &self.data {
+            if x.y < i { i = x.y}
+        }
+        i
+    }
+
+    /// Return the mean value of the process.
+    fn mean(&self) -> f64 {
+        sum(self.get_y_values().as_slice())
+    }
+
+    /// Returns a Vec<f64> of Y values.
+    fn get_y_values(&self) -> Vec<f64> {
+        let mut v = Vec::new(); 
+        for x in &self.data {
+            v.push(x.y);
+        }
+        v
+    }
+
+    /// Return quadratic variance for process
+    fn quadratic_variance(&self) -> f64 {
+        let mut var = 0.0;
+        for x in 1..=self.data.len() {
+            var += f64::powi(&self.data[x].y - &self.data[x-1].y, 2);
+        }
+        var
+    }
 }
 
 impl TimeSeries for Process<TimePoint> {
