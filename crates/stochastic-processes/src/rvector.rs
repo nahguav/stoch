@@ -1,18 +1,20 @@
+//! Generate random vectors.
+
 use rand_distr::{Distribution};
 use rand::{Rng};
 
-/// trait Sample implements a method to initiate/resample RandomVectors with generic distributions and rng.
+/// methods for initializing `RandomVector`.
 pub trait Sample<T> {
-    /// Returns a 'RandomVector' with 'n' random variables drawn from specified distribution 'dist' and source rng 'rng'.
+    /// Returns `RandomVector` with `n` random variables sampled from distribution `dist` and source `rng`.
     /// 
     /// # Arguments
     /// 
     /// * 'self'
-    /// * 'dist' - A distribution object that implements the Distribution trait rand::distributions::Distribution.
-    /// * 'rng' - A rng object that specifices the source of rng. ie, rand::Rng
-    /// * 'n' - desired length of the random vector.
-    ///  # Example
+    /// * 'dist' - object implementing rand::distributions::Distribution trait.
+    /// * 'rng' - RNG object that specifices the source of rng. ie, rand::Rng
+    /// * 'n' - length of the random vector.
     /// 
+    ///  # Example
     /// ```
     /// use stoch::rvector::{RandomVector, Sample};
     /// use rand_distr::Uniform;
@@ -23,7 +25,6 @@ pub trait Sample<T> {
     ///     let n = 2;
     ///     let rv = RandomVector::new(dist, &mut rng, n);
     ///     println!("{rv:?}");
-    ///
     /// }
     /// ```
     fn new<D, R>(dist: D, rng: &mut R, n: usize) -> Self where D: Distribution<T>, R: Rng + ?Sized;

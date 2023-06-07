@@ -1,7 +1,7 @@
 use eframe::egui::plot::{Plot, Line, PlotPoints, PlotPoint};
 use stochastic_processes::processes::{Process, TimeSeries, TimePoint}; 
 use stochastic_processes::rvector::{RandomVector, Sample};
-use stochastic_processes::mappings::sum;
+use stochastic_processes::mappings::sum_5;
 use rand_distr::{Uniform};
 
 
@@ -28,7 +28,7 @@ impl Default for GraphApp {
         let mut rng = rand::thread_rng();
     
         let rv = RandomVector::new(dist, &mut rng, n);
-        let p = Process::run_sim(&rv, sum);
+        let p = Process::run_sim(&rv, sum_5);
     
         //let m: PlotPoints = p.into();
         let lines = vec![p];
@@ -78,7 +78,7 @@ impl eframe::App for GraphApp {
                 let mut rng = rand::thread_rng();
             
                 let rv = RandomVector::new(dist, &mut rng, n);
-                let p = Process::run_sim(&rv, sum);
+                let p = Process::run_sim(&rv, sum_5);
                 lines.push(p);
                 let m = lines.len();
                 println!("{m:}");
