@@ -15,6 +15,7 @@ pub trait TimeSeries {
     /// 
     /// # Example
     /// ```
+    /// use stochastic_processes::processes::{Process, TimeSeries};
     /// let mut process = Process::init(50);
     /// ```
     fn init(n: usize) -> Process<TimePoint>;
@@ -28,12 +29,17 @@ pub trait TimeSeries {
     /// 
     /// # Example
     /// ```
+    /// use stochastic_processes::mappings::sum;
+    /// use stochastic_processes::processes::{Process, TimeSeries};
+    /// use rand_distr::Uniform;
+    /// use stochastic_processes::rvector::{RandomVector, Sample};
+    /// 
     /// let n = 2000;
     /// let dist = Uniform::new(-1.0, 1.0);
     /// let mut rng = rand::thread_rng();
     /// 
     /// let rv = RandomVector::new(dist, &mut rng, n);
-    /// let p = Process::run_sim(&rv, sum_5);
+    /// let p = Process::run_sim(&rv, sum);
     /// ```
     fn run_sim<T>(rv: &RandomVector<T>, f: fn(&[T]) -> f64) -> Process<TimePoint>;
     
@@ -83,8 +89,7 @@ impl TimeSeries for Process<TimePoint> {
     fn run_sim<T>(rv: &RandomVector<T>, f: fn(&[T]) -> f64) -> Process<TimePoint>{
         let mut p = Self::init(rv.values.len());
         for x in 0..p.data.len() {
-            // Assume that at timepoint N, the process only has knowledge of events X_1 .. X_n,
-            // thus feed the slice X_1 to X_n. Let the mappings do the logic.
+            // This code assumes that the process only has knowledge of RVs X_1 .. X_n
             p.data[x].y = f(&rv.values[0..x]);
         }
         p
@@ -131,4 +136,9 @@ impl TimeSeries for Process<TimePoint> {
     }
 }
 
+impl Process<TimePoint> {
+    pub fn len(&self) -> usize {
+        self.data.len()
+    }
+}
 

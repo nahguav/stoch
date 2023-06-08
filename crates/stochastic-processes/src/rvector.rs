@@ -16,7 +16,7 @@ pub trait Sample<T> {
     /// 
     ///  # Example
     /// ```
-    /// use stoch::rvector::{RandomVector, Sample};
+    /// use stochastic_processes::rvector::{RandomVector, Sample};
     /// use rand_distr::Uniform;
     ///
     /// fn main() {
@@ -45,7 +45,7 @@ impl<T> Sample<T> for RandomVector<T> {
     }
 }
 
-/// Converts a RandomVector<i32> into a RandomVector<f64> for mapping/computation.
+/// Converts a `RandomVector<i32>` into a `RandomVector<f64>` for mapping/computation.
 impl From<RandomVector<i32>> for RandomVector<f64> {
     fn from(rv: RandomVector<i32>) -> Self {
         let values = rv.values.iter().map(|&e| e as f64).collect();
