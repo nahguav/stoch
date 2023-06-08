@@ -30,7 +30,7 @@ pub trait Sample<T> {
     fn new<D, R>(dist: D, rng: &mut R, n: usize) -> Self where D: Distribution<T>, R: Rng + ?Sized;
 }
 
-// N dimension random vector from given distribution
+/// N dimension random vector from given distribution
 #[derive(Debug)]
 pub struct RandomVector<T> 
 {
@@ -42,6 +42,14 @@ impl<T> Sample<T> for RandomVector<T> {
     {
         let values = dist.sample_iter(rng).take(n+1).collect();
         RandomVector { values }
+    }
+}
+
+/// Converts a RandomVector<i32> into a RandomVector<f64> for mapping/computation.
+impl From<RandomVector<i32>> for RandomVector<f64> {
+    fn from(rv: RandomVector<i32>) -> Self {
+        let values = rv.values.iter().map(|&e| e as f64).collect();
+        RandomVector { values  }
     }
 }
 

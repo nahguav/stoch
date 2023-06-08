@@ -5,3 +5,4 @@
 pub mod processes;
 pub mod rvector;
 pub mod mappings;
+pub mod brownian;

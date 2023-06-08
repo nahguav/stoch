@@ -36,6 +36,21 @@ pub trait TimeSeries {
     /// let p = Process::run_sim(&rv, sum_5);
     /// ```
     fn run_sim<T>(rv: &RandomVector<T>, f: fn(&[T]) -> f64) -> Process<TimePoint>;
+    
+    /// Return the supremum of the timeseries.
+    fn sup(&self) -> f64;
+
+    /// Return the infimum of the timeseries.
+    fn inf(&self) -> f64;
+
+    /// Return the mean of the timeseries.
+    fn mean(&self) -> f64;
+
+    /// Return the quadratic variation of the timeseries.
+    fn quadratic_variation(&self) -> f64;
+
+    /// return a copy of &self.data.
+    fn get_y_values(&self) -> Vec<f64>;
 } 
 
 /// Used in `Process<TimePoint>` holds a `t` time value and a `y` value. 
@@ -51,10 +66,30 @@ pub struct Process<TimePoint> {
     pub data: Vec<TimePoint>,
 }
 
-/// helper math functions for processes.
-impl Process<TimePoint> {
+impl TimeSeries for Process<TimePoint> {
+    fn init(n: usize) -> Process<TimePoint> {
+        let mut data: Vec<TimePoint> = Vec::new();
 
-    /// Return the supremum of the process.
+        // =n because we want a point at t = 1.0.
+        // initialize all time values to y = 0.0.
+        for x in 0..=n {
+            // rust ensures no division by zero if multiplied by zero?
+            data.push(TimePoint { t: (x as f64)*(1.0/n as f64), y: 0.0 });
+        }
+        Process { data }
+    }
+
+
+    fn run_sim<T>(rv: &RandomVector<T>, f: fn(&[T]) -> f64) -> Process<TimePoint>{
+        let mut p = Self::init(rv.values.len());
+        for x in 0..p.data.len() {
+            // Assume that at timepoint N, the process only has knowledge of events X_1 .. X_n,
+            // thus feed the slice X_1 to X_n. Let the mappings do the logic.
+            p.data[x].y = f(&rv.values[0..x]);
+        }
+        p
+    }
+
     fn sup(&self) -> f64 {
         let mut s = NEG_INFINITY; 
         for x in &self.data {
@@ -87,7 +122,7 @@ impl Process<TimePoint> {
     }
 
     /// Return quadratic variance for process
-    fn quadratic_variance(&self) -> f64 {
+    fn quadratic_variation(&self) -> f64 {
         let mut var = 0.0;
         for x in 1..=self.data.len() {
             var += f64::powi(&self.data[x].y - &self.data[x-1].y, 2);
@@ -96,28 +131,4 @@ impl Process<TimePoint> {
     }
 }
 
-impl TimeSeries for Process<TimePoint> {
-    fn init(n: usize) -> Process<TimePoint> {
-        let mut data: Vec<TimePoint> = Vec::new();
-
-        // =n because we want a point at t = 1.0.
-        // initialize all time values to y = 0.0.
-        for x in 0..=n {
-            // rust ensures no division by zero if multiplied by zero?
-            data.push(TimePoint { t: (x as f64)*(1.0/n as f64), y: 0.0 });
-        }
-        Process { data }
-    }
-
-
-    fn run_sim<T>(rv: &RandomVector<T>, f: fn(&[T]) -> f64) -> Process<TimePoint>{
-        let mut p = Self::init(rv.values.len());
-        for x in 0..p.data.len() {
-            // Assume that at timepoint N, the process only has knowledge of events X_1 .. X_n,
-            // thus feed the slice X_1 to X_n. Let the mappings do the logic.
-            p.data[x].y = f(&rv.values[0..x]);
-        }
-        p
-    }
-}
 

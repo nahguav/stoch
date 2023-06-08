@@ -1,8 +1,8 @@
 use eframe::egui::plot::{Plot, Line, PlotPoints, PlotPoint};
 use stochastic_processes::processes::{Process, TimeSeries, TimePoint}; 
 use stochastic_processes::rvector::{RandomVector, Sample};
-use stochastic_processes::mappings::sum_5;
-use rand_distr::{Uniform};
+use stochastic_processes::mappings::{sum, martingale_strat};
+use rand_distr::{Uniform, StandardNormal};
 
 
 pub struct GraphApp {
@@ -23,19 +23,27 @@ pub trait PlotSeries {
 
 impl Default for GraphApp {
     fn default() -> Self {
-        let n = 2000;
-        let dist = Uniform::new(-1.0, 1.0);
+        // generate 5 paths of 200 timepoints. 
+        //let p = <Process<TimePoint> as BrownianMotion>::many_new(200, 5);
+
+        // deref the Box<> paths.
+        // let mut lines = Vec::new();
+        // for x in p {
+        //     lines.push(*x) 
+        // }
+
+        let uni = Uniform::new(0, 2);
         let mut rng = rand::thread_rng();
-    
-        let rv = RandomVector::new(dist, &mut rng, n);
-        let p = Process::run_sim(&rv, sum_5);
-    
-        //let m: PlotPoints = p.into();
+        let n = 10;
+
+        let rv = RandomVector::new(uni, &mut rng, n);
+        let a = RandomVector::<f64>::from(rv);
+        let p = Process::run_sim(&a, martingale_strat);
         let lines = vec![p];
-        //let line = Line::new(m);         
+
 
         Self {
-            lines: lines,
+            lines
         }
     }
 }
@@ -73,12 +81,19 @@ impl eframe::App for GraphApp {
                 ui.label("Write something: ");
             });
             if ui.button("Increment").clicked() {
-                let n = 2000;
-                let dist = Uniform::new(-1.0, 1.0);
-                let mut rng = rand::thread_rng();
+                // let n = 200;
+                // let dist = StandardNormal;
+                // let mut rng = rand::thread_rng();
             
-                let rv = RandomVector::new(dist, &mut rng, n);
-                let p = Process::run_sim(&rv, sum_5);
+                // let rv = RandomVector::new(dist, &mut rng, n);
+                // let p = Process::run_sim(&rv, sum);
+                let uni = Uniform::new(0, 2);
+                let mut rng = rand::thread_rng();
+                let n = 10;
+        
+                let rv = RandomVector::<f64>::from(RandomVector::new(uni, &mut rng, n));
+                let p = Process::run_sim(&rv, martingale_strat);
+
                 lines.push(p);
                 let m = lines.len();
                 println!("{m:}");
@@ -108,4 +123,5 @@ impl PlotSeries for Process<TimePoint> {
         }
         PlotPoints::Owned(v)
     }
+    
 }
