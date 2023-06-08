@@ -1,8 +1,8 @@
 use eframe::egui::plot::{Plot, Line, PlotPoints, PlotPoint};
 use stochastic_processes::processes::{Process, TimeSeries, TimePoint}; 
 use stochastic_processes::rvector::{RandomVector, Sample};
-use stochastic_processes::mappings::{sum, martingale_strat};
-use rand_distr::{Uniform, StandardNormal};
+use stochastic_processes::mappings::{martingale_strat};
+use rand_distr::{Uniform};
 
 
 pub struct GraphApp {
@@ -50,7 +50,7 @@ impl Default for GraphApp {
 
 impl GraphApp {
     /// Called once before the first frame.
-    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+    pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         // This is also where you can customize the look and feel of egui using
         // `cc.egui_ctx.set_visuals` and `cc.egui_ctx.set_fonts`.
         

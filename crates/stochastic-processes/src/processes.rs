@@ -114,7 +114,7 @@ impl TimeSeries for Process<TimePoint> {
 
     /// Returns a Vec<f64> of Y values.
     fn get_y_values(&self) -> Vec<f64> {
-        let mut v = Vec::new(); 
+        let mut v = Vec::new();  
         for x in &self.data {
             v.push(x.y);
         }

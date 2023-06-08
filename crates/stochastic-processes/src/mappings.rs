@@ -15,8 +15,8 @@
 /// let dist = Uniform::new(-1.0, 1.0);
 /// let mut rng = rand::thread_rng();
 ///
-/// let rv = RandomVector::new(dist, &mut rng, n);
-/// let p = Process::run_sim(&rv, sum); // <- used here to specify the mapping f: X -> Y. 
+/// //let rv = RandomVector::new(dist, &mut rng, n);
+/// //let p = Process::run_sim(&rv, sum); // <- used here to specify the mapping f: X -> Y. 
 /// ```
 pub fn sum(rv: &[f64]) -> f64 {
     let mut sum = 0.0;

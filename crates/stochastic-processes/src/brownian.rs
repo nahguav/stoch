@@ -18,7 +18,7 @@ impl BrownianMotion for Process<TimePoint> {
     }
     fn many_new(step: usize, paths: usize) -> Vec<Box<Self>> {
         let mut r = Vec::new();
-        for i in 0..paths {
+        for _ in 0..paths {
             r.push(Box::new(Self::new(step)));
         }
         r

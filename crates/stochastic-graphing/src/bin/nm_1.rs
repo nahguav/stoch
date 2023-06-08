@@ -1,18 +1,17 @@
-use rand_distr::{Uniform, Standard, Distribution};
-use rand::Rng;
+use stochastic_processes::processes::{Process, TimeSeries};
+use stochastic_processes::rvector::{RandomVector, Sample};
+use stochastic_processes::mappings::martingale_strat;
+use rand_distr::Uniform;
 
-#[derive(Debug)]
-
-pub struct CoinFlip(u32);
 
 fn main() {
+    let uni = Uniform::new(0, 2);
     let mut rng = rand::thread_rng();
-    let angle: CoinFlip = rng.gen();
-    println!("Random angle: {angle:?}");
-}
+    let n = 10;
 
-impl Distribution<CoinFlip> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> CoinFlip {
-        CoinFlip(Uniform::new(0, 2).sample(rng))
-    }
+    let rv = RandomVector::new(uni, &mut rng, n);
+    let a = RandomVector::<f64>::from(rv);
+    let p = Process::run_sim(&a, martingale_strat).get_y_values();
+
+    println!("{p:?}");
 }
