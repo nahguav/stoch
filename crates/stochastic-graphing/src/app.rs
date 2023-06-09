@@ -3,6 +3,10 @@ use stochastic_processes::processes::{Process, TimeSeries, TimePoint};
 use stochastic_processes::rvector::{RandomVector, Sample};
 use stochastic_processes::mappings::{martingale_strat};
 use rand_distr::{Uniform};
+use rand::rngs::SmallRng;
+use rand::{thread_rng, SeedableRng};
+use rand_distr::WeightedAliasIndex;
+use stochastic_processes::mappings::sum;
 
 
 pub struct GraphApp {
@@ -23,22 +27,22 @@ pub trait PlotSeries {
 
 impl Default for GraphApp {
     fn default() -> Self {
-        // generate 5 paths of 200 timepoints. 
-        //let p = <Process<TimePoint> as BrownianMotion>::many_new(200, 5);
-
-        // deref the Box<> paths.
-        // let mut lines = Vec::new();
-        // for x in p {
-        //     lines.push(*x) 
-        // }
-
-        let uni = Uniform::new(0, 2);
-        let mut rng = rand::thread_rng();
-        let n = 10;
-
-        let rv = RandomVector::new(uni, &mut rng, n);
+        let choices = vec![2, -1];
+        let weights = vec![1, 2];
+    
+        // weighted distribution, in this case, 1/3 chance to hit 2, 2/3 chance to hit -1.
+        let dist = WeightedAliasIndex::new(weights).unwrap();
+        // typical fast source of rng
+        let mut rng = SmallRng::from_rng(thread_rng()).unwrap();
+        // in order to have moments converge, use large n.
+        let n = 200000;
+    
+        // create the random vector.
+        let rv = RandomVector::new_with_weighted(dist, &mut rng, &choices, n);
         let a = RandomVector::<f64>::from(rv);
-        let p = Process::run_sim(&a, martingale_strat);
+    
+        // apply the sum function to make into a martingale.
+        let p = Process::run_sim(&a, sum);
         let lines = vec![p];
 
 

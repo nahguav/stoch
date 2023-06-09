@@ -18,7 +18,7 @@ pub trait TimeSeries {
     /// use stochastic_processes::processes::{Process, TimeSeries};
     /// let mut process = Process::init(50);
     /// ```
-    fn init(n: usize) -> Process<TimePoint>;
+    fn init(n: usize) -> Self;
 
     /// Return a sampled `Process`.
     /// 
@@ -41,7 +41,7 @@ pub trait TimeSeries {
     /// let rv = RandomVector::new(dist, &mut rng, n);
     /// let p = Process::run_sim(&rv, sum);
     /// ```
-    fn run_sim<T>(rv: &RandomVector<T>, f: fn(&[T]) -> f64) -> Process<TimePoint>;
+    fn run_sim<T>(rv: &RandomVector<T>, f: fn(&[T]) -> f64) -> Self;
     
     /// Return the supremum of the timeseries.
     fn sup(&self) -> f64;
@@ -51,9 +51,6 @@ pub trait TimeSeries {
 
     /// Return the mean of the timeseries.
     fn mean(&self) -> f64;
-
-    /// Return the quadratic variation of the timeseries.
-    fn quadratic_variation(&self) -> f64;
 
     /// return a copy of &self.data.
     fn get_y_values(&self) -> Vec<f64>;
@@ -73,7 +70,7 @@ pub struct Process<TimePoint> {
 }
 
 impl TimeSeries for Process<TimePoint> {
-    fn init(n: usize) -> Process<TimePoint> {
+    fn init(n: usize) -> Self {
         let mut data: Vec<TimePoint> = Vec::new();
 
         // =n because we want a point at t = 1.0.
@@ -86,7 +83,7 @@ impl TimeSeries for Process<TimePoint> {
     }
 
 
-    fn run_sim<T>(rv: &RandomVector<T>, f: fn(&[T]) -> f64) -> Process<TimePoint>{
+    fn run_sim<T>(rv: &RandomVector<T>, f: fn(&[T]) -> f64) -> Self{
         let mut p = Self::init(rv.values.len());
         for x in 0..p.data.len() {
             // This code assumes that the process only has knowledge of RVs X_1 .. X_n
@@ -114,7 +111,7 @@ impl TimeSeries for Process<TimePoint> {
 
     /// Return the mean value of the process.
     fn mean(&self) -> f64 {
-        sum(self.get_y_values().as_slice())
+        sum(self.get_y_values().as_slice()) / (self.len() as f64)
     }
 
     /// Returns a Vec<f64> of Y values.
@@ -125,20 +122,16 @@ impl TimeSeries for Process<TimePoint> {
         }
         v
     }
-
-    /// Return quadratic variance for process
-    fn quadratic_variation(&self) -> f64 {
-        let mut var = 0.0;
-        for x in 1..=self.data.len() {
-            var += f64::powi(&self.data[x].y - &self.data[x-1].y, 2);
-        }
-        var
-    }
 }
 
 impl Process<TimePoint> {
     pub fn len(&self) -> usize {
-        self.data.len()
+        self.data.len() 
+    }
+
+    // this is wrong, need to fix. ie, E[X^2] != E[X]^2
+    pub fn moment(&self, r: i32) -> f64 {
+        f64::powi(self.mean(), r)
     }
 }
 
